@@ -1,0 +1,337 @@
+#!/bin/bash
+
+# =============================================================================
+# VVV Site Setup Script
+# By Alison Barrett <alison@barre.tt>
+# https://github.com/aliso/vvv-site-wizard
+#
+# Version 1.0
+#
+# This script automates the creation & deletion of new WordPress sites using
+# Varying Vagrant Vagrants (https://github.com/Varying-Vagrant-Vagrants/VVV).
+#
+# Usage:
+# vvv new|create|make [site]
+# vvv delete|rm|teardown [site]
+# vvv list
+# =============================================================================
+#
+# When not called from the VVV root directory, the script will prompt the user
+# for the path to VVV. To run this from any directory and skip that prompt,
+# uncomment the following line and set it to the VVV root dir:
+path=/Volumes/Data/vvv
+
+# =============================================================================
+# Helper function for printing out usage information.
+# =============================================================================
+usage() { echo -e "Usage: vvv new|create|make [site]\n       vvv delete|rm|teardown [site]\n       vvv list"; exit 1; }
+
+# =============================================================================
+# Helper function since a green "Done." is used in a lot of places
+# =============================================================================
+done_text() { echo -e "\033[32mDone.\033[0m"; return; }
+
+# =============================================================================
+# Helper function to make colored text easier to code and more readable
+# within the code.
+# =============================================================================
+cecho() {
+	message=$1
+	color=${2:-'default'}
+	attribute=${3:-'none'}
+
+	color_type='3'
+	color_code='0'
+	if [[ $color = 'black' ]]; then
+		color_code='0'
+	elif [[ $color = 'red' ]]; then
+		color_code='1'
+	elif [[ $color = 'green' ]]; then
+		color_code='2'
+	elif [[ $color = 'yellow' ]]; then
+		color_code='3'
+	elif [[ $color = 'blue' ]]; then
+		color_code='4'
+	elif [[ $color = 'magenta' ]]; then
+		color_code='5'
+	elif [[ $color = 'cyan' ]]; then
+		color_code='6'
+	elif [[ $color = 'white' ]]; then
+		color_code='7'
+	fi
+
+	attribute_code=''
+	if [[ $attribute = 'bold' ]]; then
+		attribute_code=';1'
+	elif [[ $attribute = 'underlined' ]]; then
+		attribute_code=';4'
+	elif [[ $attribute = 'reverse' ]]; then
+		attribute_code=';7'
+	elif [[ $attribute = 'background' ]]; then
+		color_type='0;1;4'
+	fi
+
+	# set text attributes
+	echo -en "\033[${color_type}${color_code}${attribute_code}m"
+	# echo text
+	echo -en "$message"
+	# reset text attributes
+	echo -en "\033[0m\n"
+
+	return
+}
+
+# =============================================================================
+# Vaaaaaars!
+# =============================================================================
+action=$1
+site=$2
+files_only=$3
+
+# =============================================================================
+# Get the VVV root directory if the user is entering a valid command
+#
+# This is placed outside of the action conditionals below because setting the
+# directory is required for every possible action.
+# =============================================================================
+if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'delete' || $action = 'teardown' || $action = 'rm' || $action = 'list' ]]; then
+	# Get VVV root dir
+	if [ ! -z $path ]; then
+		path=$path
+	else
+		current_dir=`pwd`
+		if [ -e "$current_dir/Vagrantfile" ]; then
+			path=`pwd`
+		else
+			while [ -z $path ]; do
+				echo -n "VVV local root: "
+				read path
+
+				# Make sure directory is actually a VVV root
+				if [ ! -e "$path/Vagrantfile" ]; then
+					cecho "Path specified is not a VVV root directory." red bold
+					unset path
+				fi
+			done
+		fi
+	fi
+fi
+
+# =============================================================================
+# Create a site
+#
+# New sites are created with a fresh installation of WordPress trunk that
+# updates each time Vagrant is provisioned (vagrant up --provision).
+#
+# New site credentials:
+# Username: admin
+# Password: password
+#
+# If you want to see the files that are created without spinning up the new
+# site, use a third parameter of 'filesonly'. Example:
+# vvv [new|create|make] site filesonly
+# =============================================================================
+if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
+
+	cecho "\nNew VVV Site Setup" blue bold
+
+	# Prompt user for vars
+	# =============================================================================
+
+	# Get site dir name if not supplied as argument
+	if [ -d "$path/www/$site" ]; then
+		cecho "Directory $path/www/$site already exists." red
+		unset site
+	fi
+	while [ -z $site ]; do
+		echo -n "Name of new site directory: "
+		read site
+
+		if [ -z $site ]; then
+			cecho "You must enter a directory name." red
+		elif [ -d "$path/www/$site" ]; then
+			cecho "Directory already exists." red
+			unset site
+		fi
+	done
+
+	# Get database name
+	db_name=$site
+
+	# Get local URL
+	echo -n "Domain to use (leave blank for $site.dev): "
+	read domain
+	if [ -z $domain ]; then
+		domain="$site.dev"
+	fi
+
+	# Inform the user of what's about to happen and give them a chance to back out
+	# =============================================================================
+	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
+	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
+		echo -e "* Run \`vagrant up --provision\` to initialize site"
+	fi
+	echo -en "\n"
+	while [ -z $continue_create ]; do
+		echo -n "Continue (y/n)? "
+		read continue_create
+
+		if [[ $continue_create = 'n' ]]; then
+			cecho "Site setup aborted." red
+			exit
+		elif [[ $continue_create != 'y' ]]; then
+			cecho "Answer y or n." red
+			unset continue_create
+		fi
+	done
+
+	# Start the par-tay
+	# =============================================================================
+	cecho "\nNew VVV setup starting for site '$site'" green
+	cd $path
+	vagrant halt
+
+	# Create site folder with vvv-init.sh file
+	# =============================================================================
+	cd $path/www
+	echo -en "Creating site directory and vvv-init.sh file... "
+	mkdir $site; cd $site
+
+	printf "echo \"Creating database $site (if it does not exist)...\"\n"\
+"mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
+"mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n"\
+"if [ ! -d \"htdocs\" ]; then\n"\
+"\techo 'Checking out WordPress trunk in $site/htdocs...'\n"\
+"\tsvn checkout http://svn.automattic.com/wordpress/trunk/ htdocs\n"\
+"\tcd htdocs\n"\
+"\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root\n"\
+"\twp core install --url=$domain --title=\"$site - WordPress Trunk\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
+"\tcd ..\n"\
+"else\n"\
+"\techo 'Updating WordPress trunk in $site/htdocs...'\n"\
+"\tsvn up htdocs\n"\
+"fi\n" > vvv-init.sh
+
+	done_text
+
+	# Add vvv-hosts file for domain in the site's www root
+	# =============================================================================
+	cd $path/www/$site
+	echo -en "Adding $domain to new vvv-hosts file... "
+	touch vvv-hosts
+	printf "$domain\n" >> vvv-hosts
+	done_text
+
+	# Add site conf file to nginx-config
+	# =============================================================================
+	cd $path/config/nginx-config/sites
+	echo -en "Creating nginx-config/sites/$site.conf... "
+	sed -e "s/testserver\.com/$domain/" \
+		-e "s/wordpress-local/$site\/htdocs/" local-nginx-example.conf-sample > $site.conf
+	done_text
+
+	# vagrant waaaaay up
+	# =============================================================================
+	cd $path
+	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
+		echo -e "Running vagrant up --provision... "
+		vagrant up --provision
+	fi
+
+	# OMG we're done.
+	# =============================================================================
+	if [[ ! -z $files_only && $files_only == 'filesonly' ]]; then
+		cecho "\nNote: You must run \`vagrant up --provision\` to initialize the new site before $domain will load in a browser." red
+	fi
+
+	cecho "\nNew VVV Site Setup: Done!" blue bold
+	echo "Directory: $path/www/$site"
+	echo "URL:       $domain"
+	echo "Username:  admin"
+	echo "Password:  password"
+
+	exit
+
+# =============================================================================
+# Delete a site
+#
+# This will remove the site folder from www and remove the .conf file from
+# nginx-config. Sites and folders installed by default with VVV cannot be
+# deleted this way.
+# =============================================================================
+elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
+
+	cecho "\nVVV Site Teardown" blue bold
+
+	# Get site dir name if not supplied as argument
+	while [ -z $site ]; do
+		echo -n "Site directory to delete: "
+		read site
+
+		if [[ -z $site || ! -d "$path/www/$site" ]]; then
+			cecho "You must enter a valid directory from $path/www/."
+			unset site
+		elif [[ $site = 'wordpress-default' || $site = 'wordpress-develop' || $site = 'wordpress-trunk' || $site = 'default' || $site = 'phpcs' || $site = 'vvv-hosts' || $site = 'wp-cli' || $site = '.gitshow' ]]; then
+			cecho "This script can't delete the default VVV folders." red
+			unset site
+		fi
+	done
+
+	# Start the deletion par-tay
+	# =============================================================================
+	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Delete directory $site in $path/www\n* Delete file $site.conf in $path/config/nginx-config/sites\n"
+	while [ -z $continue_delete ]; do
+		echo -n "Continue (y/n)? "
+		read continue_delete
+		if [ $continue_delete = 'y' ]; then
+			cecho "\nVVV teardown starting for site '$site'" green
+			cd $path
+
+			vagrant halt
+
+			# Delete the site folder
+			echo -en "Removing directory $site... "
+			rm -rf $path/www/$site
+			echo -e $done_text
+
+			# Remove the nginx conf file
+			echo -en "Removing nginx config file $site.conf... "
+			rm $path/config/nginx-config/sites/$site.conf
+			echo -e $done_text
+
+			# Delorted.
+			cecho "\nVVV Site Teardown: Done!" blue bold
+			exit
+
+		elif [ $continue_delete = 'n' ]; then
+			cecho "Site teardown aborted." red
+			exit
+		else
+			cecho "Answer y or n." red
+			unset continue_delete
+		fi
+	done
+	exit
+
+# =============================================================================
+# List VVV sites
+#
+# This lists the VVV sites currently present in the www folder, including the
+# sites installed by default with VVV (wordpress-default, wordpress-trunk,
+# and wordpress-dev).
+# =============================================================================
+elif [[ $action = 'list' ]]; then
+
+	cd $path/www
+	find . -type d -print0 -maxdepth 1 -mindepth 1 | while IFS= read -d '' filename; do
+		filename=${filename:2}
+		if [[ $filename != 'default' && $filename != 'phpcs' && $filename != 'wp-cli' ]]; then
+			echo $filename
+		fi
+	done
+	exit
+
+else
+	usage
+	exit
+fi
