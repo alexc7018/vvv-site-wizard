@@ -19,7 +19,7 @@
 # When not called from the VVV root directory, the script will prompt the user
 # for the path to VVV. To run this from any directory and skip that prompt,
 # uncomment the following line and set it to the VVV root dir:
-path=/Volumes/Data/vvv
+#path=/path/to/vvv/root
 
 # =============================================================================
 # Helper function for printing out usage information.
