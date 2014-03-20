@@ -42,17 +42,23 @@ cecho() {
 
 	color_type='3'
 	color_code='0'
-	
-	case $color in
-	    -black) color_code=0;;
-	    -red) color_code=1;;
-	    -green) color_code=2;;
-	    -yellow) color_code=3;;
-	    -blue) color_code=4;;
-	    -magenta) color_code=5;;
-	    -cyan) color_code=6;;
-	    -white) color_code=7;;
-	 esac
+	if [[ $color = 'black' ]]; then
+		color_code='0'
+	elif [[ $color = 'red' ]]; then
+		color_code='1'
+	elif [[ $color = 'green' ]]; then
+		color_code='2'
+	elif [[ $color = 'yellow' ]]; then
+		color_code='3'
+	elif [[ $color = 'blue' ]]; then
+		color_code='4'
+	elif [[ $color = 'magenta' ]]; then
+		color_code='5'
+	elif [[ $color = 'cyan' ]]; then
+		color_code='6'
+	elif [[ $color = 'white' ]]; then
+		color_code='7'
+	fi
 
 	attribute_code=''
 	if [[ $attribute = 'bold' ]]; then
