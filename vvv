@@ -211,8 +211,8 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 "\t\tcd -\n"\
 "else\n"\
 "\techo 'Updating WordPress in $site/htdocs...'\n"\
-"\twp core update --path=./htdocs && \\ \n"\
-"\t\twp core update-db --path=./htdocs\n"\
+"\twp core update --allow-root\\ \n"\
+"\t\twp core update-db --allow-root\n"\
 "fi\n" > vvv-init.sh
 
 	done_text
