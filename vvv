@@ -165,6 +165,15 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		domain="$site.dev"
 	fi
 
+	# Get WordPress version
+	echo -n "WordPress version (svn tag) to use (leave blank for trunk): "
+	read version
+	if [ -z $version ]; then
+		installversion="trunk"
+	else
+		installversion="tags/$version"
+	fi
+
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
 	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
@@ -201,14 +210,14 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 "mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
 "mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n"\
 "if [ ! -d \"htdocs\" ]; then\n"\
-"\techo 'Checking out WordPress trunk in $site/htdocs...'\n"\
-"\tsvn checkout http://svn.automattic.com/wordpress/trunk/ htdocs\n"\
+"\techo 'Checking out WordPress $version in $site/htdocs...'\n"\
+"\tsvn checkout http://svn.automattic.com/wordpress/$installversion/ htdocs\n"\
 "\tcd htdocs\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root\n"\
-"\twp core install --url=$domain --title=\"$site - WordPress Trunk\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
+"\twp core install --url=$domain --title=\"$site - WordPress $version\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
 "\tcd ..\n"\
 "else\n"\
-"\techo 'Updating WordPress trunk in $site/htdocs...'\n"\
+"\techo 'Updating WordPress $version in $site/htdocs...'\n"\
 "\tsvn up htdocs\n"\
 "fi\n" > vvv-init.sh
 
