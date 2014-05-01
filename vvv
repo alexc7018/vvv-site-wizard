@@ -325,7 +325,7 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 elif [[ $action = 'list' ]]; then
 
 	cd $path/www
-	find . -type d -print0 -maxdepth 1 -mindepth 1 | while IFS= read -d '' filename; do
+	find . -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -d '' filename; do
 		filename=${filename:2}
 		if [[ $filename != 'default' && $filename != 'phpcs' && $filename != 'wp-cli' ]]; then
 			echo $filename
