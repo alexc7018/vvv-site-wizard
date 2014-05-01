@@ -167,7 +167,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
-	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
+	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
 	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
 		echo -e "* Run \`vagrant up --provision\` to initialize site"
 	fi
