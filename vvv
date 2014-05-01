@@ -194,22 +194,25 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# Create site folder with vvv-init.sh file
 	# =============================================================================
 	cd $path/www
-	echo -en "Creating site directory and vvv-init.sh file... "
-	mkdir $site; cd $site
+	echo -en "Creating site directory, wp-cli.yml, and vvv-init.sh file... "
+	mkdir $site && cd $site
 
-	printf "echo \"Creating database $site (if it does not exist)...\"\n"\
+	printf "path: htdocs" > wp-cli.yml
+
+	printf "echo \"Creating database '$site' (if it does not exist)...\"\n\n"\
 "mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
-"mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n"\
+"mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n\n"\
 "if [ ! -d \"htdocs\" ]; then\n"\
-"\techo 'Checking out WordPress trunk in $site/htdocs...'\n"\
-"\tsvn checkout http://svn.automattic.com/wordpress/trunk/ htdocs\n"\
-"\tcd htdocs\n"\
-"\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root\n"\
-"\twp core install --url=$domain --title=\"$site - WordPress Trunk\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
-"\tcd ..\n"\
+"\techo 'Installing WordPress trunk to \"$site/htdocs\" ...'\n"\
+"\tmkdir ./htdocs && cd ./htdocs && \\ \n"\
+"\t\twp core download --allow-root && \\ \n"\
+"\t\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root && \\ \n"\
+"\t\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root && \\ \n"\
+"\t\tcd -\n"\
 "else\n"\
-"\techo 'Updating WordPress trunk in $site/htdocs...'\n"\
-"\tsvn up htdocs\n"\
+"\techo 'Updating WordPress in $site/htdocs...'\n"\
+"\twp core update --allow-root\\ \n"\
+"\t\twp core update-db --allow-root\n"\
 "fi\n" > vvv-init.sh
 
 	done_text
