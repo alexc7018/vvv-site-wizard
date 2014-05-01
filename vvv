@@ -114,6 +114,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'de
 			done
 		fi
 	fi
+	path=${path%/}
 fi
 
 # =============================================================================
