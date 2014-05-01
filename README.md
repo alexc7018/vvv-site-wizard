@@ -4,16 +4,11 @@ This bash script makes it easy to spin up a new WordPress site using [Varying Va
 
 ## Installation
 
-Place `vvv` in any folder included in your PATH environment variable. To add a folder to PATH:
+Download the script and run `./vvv` from the directory the script is placed in.
 
-1. Open `~/.bashrc` (or `~/.bash_profile`)
-1. If `PATH` is not defined anywhere in the file, add this line:
+To run the script from anywhere, you can place `vvv` in a folder included in your PATH environment variable.
 
-		export PATH=/path/to/folder:$PATH
-
-	Where `/path/to/folder` is the path to the folder containing the script.
-1. Changes take effect in a new Terminal session.
-1. To run the script from anywhere, open the file and uncomment the line at the top defining `path`. Set that to the root folder of VVV on your machine.
+If you don't want to define the path each time you run the script, open the file and uncomment the line at the top defining `path`. Set that to the root folder of VVV on your machine.
 
 ## Usage
 
@@ -28,25 +23,28 @@ This lists all the sites currently in VVV's `www` folder.
 Creating a site does the following:
 
 * Halts Vagrant (if running)
-* Creates a web root for the site in the `www` folder containing two files: `vvv-init.sh` and `vvv-hosts`
-	* `vvv-init.sh` tells Vagrant to create a database if one does not exist and download or update WordPress from trunk the next time Vagrant is provisioned
+* Creates a web root for the site in the `www` folder containing three files: `vvv-init.sh`, `wp-cli.yml`, and `vvv-hosts`
+	* `vvv-init.sh` tells Vagrant to create a database if one does not exist and install the latest version of WordPress (via WP-CLI) the next time Vagrant is provisioned
+	* `wp-cli.yml` tells WP-CLI that WordPress is in the htdocs folder
 	* `vvv-hosts` contains the hosts entry to give your site a nice custom domain (the domain is set in the wizard)
 * Creates a file in the `nginx-config` folder to handle server settings for your site
 * Restarts Vagrant with `vagrant up --provision`
 
-Provisioning Vagrant takes a couple of minutes, but this is a crucial step as it checks out WordPress trunk into your site's htdocs directory.
+Provisioning Vagrant takes a couple of minutes, but this is a crucial step as it downloads WordPress into your site's htdocs directory and runs the installation. If you want to skip provisioning and install WordPress manually, you can run the new site's `vvv-init.sh` file directly in the Vagrant shell.
 
 #### `vvv new|create|make [site] [filesonly]`
 
-Adding the `filesonly` parameter to this command will do everything in the list above except restart Vagrant. This is useful for testing the script quickly (as provisioning Vagrant takes a while).
+Adding the `filesonly` parameter to this command will do everything in the list above except restart Vagrant. This is useful for testing the script quickly, or if you're creating multiple sites (as provisioning Vagrant takes a while).
 
 ### `vvv delete|rm|teardown [site]`
 
 Deleting a site does the following:
 
 * Halts Vagrant (if running)
-* Deletes the site's web root (which deletes the `vvv-init.sh` and `vvv-hosts` files as well)
+* Deletes the site's web root (which deletes the `vvv-init.sh`, `wp-cli.yml`, and `vvv-hosts` files as well)
 * Deletes the file in the `nginx-config` folder pertaining to the site
+
+Note that it does not delete the site's database.
 
 ## Questions?
 
