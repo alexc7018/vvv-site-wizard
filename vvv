@@ -164,6 +164,24 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		domain="$site.dev"
 	fi
 
+	while [ -z $version ]; do
+		# Get WordPress version
+		echo -n "WordPress version to install (leave blank for release version): "
+		read version
+		if [ -z $version ]; then
+			installversion=""
+			version="(release version)"
+		else
+			# Attempt to verify the existence of the version (hacky)
+			if curl -s http://codex.wordpress.org/Version_$version | grep 'currently no text' > ok; then
+				cecho "Version $version not found, try again" red
+				unset version
+			else
+				installversion=" --version=$version"
+			fi
+		fi
+	done
+
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
 	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
@@ -202,9 +220,9 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 "mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
 "mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n\n"\
 "if [ ! -d \"htdocs\" ]; then\n"\
-"\techo 'Installing WordPress in $site/htdocs...'\n"\
+"\techo 'Installing WordPress $version in $site/htdocs...'\n"\
 "\tmkdir ./htdocs\ncd ./htdocs\n"\
-"\twp core download --allow-root\n"\
+"\twp core download --allow-root $installversion\n"
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root\n"\
 "\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
 "\t\tcd -\n"\
