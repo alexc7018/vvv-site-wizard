@@ -104,8 +104,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'de
 			path=`pwd`
 		else
 			while [ -z $path ]; do
-				echo -n "VVV local root: "
-				read path
+				read -e -p "VVV install directory: " path
 
 				# Make sure directory is actually a VVV root
 				if [ ! -e "$path/Vagrantfile" ]; then
@@ -115,6 +114,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'de
 			done
 		fi
 	fi
+	path=${path%/}
 fi
 
 # =============================================================================
@@ -144,8 +144,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		unset site
 	fi
 	while [ -z $site ]; do
-		echo -n "Name of new site directory: "
-		read site
+		read -e -p "Name of new site directory: " site
 
 		if [ -z $site ]; then
 			cecho "You must enter a directory name." red
@@ -165,18 +164,9 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		domain="$site.dev"
 	fi
 
-	# Get WordPress version
-	echo -n "WordPress version (svn tag) to use (leave blank for trunk): "
-	read version
-	if [ -z $version ]; then
-		installversion="trunk"
-	else
-		installversion="tags/$version"
-	fi
-
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
-	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
+	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
 	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
 		echo -e "* Run \`vagrant up --provision\` to initialize site"
 	fi
@@ -203,22 +193,25 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# Create site folder with vvv-init.sh file
 	# =============================================================================
 	cd $path/www
-	echo -en "Creating site directory and vvv-init.sh file... "
-	mkdir $site; cd $site
+	echo -en "Creating site directory, wp-cli.yml, and vvv-init.sh file... "
+	mkdir $site && cd $site
 
-	printf "echo \"Creating database $site (if it does not exist)...\"\n"\
+	printf "path: htdocs" > wp-cli.yml
+
+	printf "echo \"Creating database '$site' (if it does not exist)...\"\n\n"\
 "mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
-"mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n"\
+"mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n\n"\
 "if [ ! -d \"htdocs\" ]; then\n"\
-"\techo 'Checking out WordPress $version in $site/htdocs...'\n"\
-"\tsvn checkout http://svn.automattic.com/wordpress/$installversion/ htdocs\n"\
-"\tcd htdocs\n"\
+"\techo 'Installing WordPress in $site/htdocs...'\n"\
+"\tmkdir ./htdocs\ncd ./htdocs\n"\
+"\twp core download --allow-root\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root\n"\
-"\twp core install --url=$domain --title=\"$site - WordPress $version\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
-"\tcd ..\n"\
+"\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
+"\t\tcd -\n"\
 "else\n"\
-"\techo 'Updating WordPress $version in $site/htdocs...'\n"\
-"\tsvn up htdocs\n"\
+"\techo 'Updating WordPress in $site/htdocs...'\n"\
+"\twp core update --allow-root\n"\
+"\twp core update-db --allow-root\n"\
 "fi\n" > vvv-init.sh
 
 	done_text
@@ -332,7 +325,7 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 elif [[ $action = 'list' ]]; then
 
 	cd $path/www
-	find . -type d -print0 -maxdepth 1 -mindepth 1 | while IFS= read -d '' filename; do
+	find . -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -d '' filename; do
 		filename=${filename:2}
 		if [[ $filename != 'default' && $filename != 'phpcs' && $filename != 'wp-cli' ]]; then
 			echo $filename
