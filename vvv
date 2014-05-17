@@ -213,6 +213,16 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		fi
 	done
 
+	if [ ! -z $version ]; then
+		# Attempt to verify the existence of the version (hacky)
+		if curl -s http://codex.wordpress.org/Version_$version | grep 'currently no text' > /dev/null; then
+			cecho "Version $version not found, try again" red
+			unset version
+		else
+			installversion=" --version=$version"
+		fi
+	fi
+
 	while [[ -z $version ]]; do
 		# Get WordPress version
 		echo -n "WordPress version to install (leave blank for release version): "
