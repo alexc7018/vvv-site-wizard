@@ -191,11 +191,13 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	db_name=$site
 
 	# Get local URL
-	echo -n "Domain to use (leave blank for $site.dev): "
-	read domain
-	if [ -z $domain ]; then
-		domain="$site.dev"
-	fi
+	while [ -z $domain ]; do
+		echo -n "Domain to use (leave blank for $site.dev): "
+		read domain
+		if [ -z $domain ]; then
+			domain="$site.dev"
+		fi
+	done
 
 	while [[ -z $version ]]; do
 		# Get WordPress version
