@@ -23,7 +23,19 @@
 # =============================================================================
 # Helper function for printing out usage information.
 # =============================================================================
-usage() { echo -e "Usage: vvv [-a create|delete|list] [-n site] [-v version] [-d domain] [-p path/to/vvv] [-f] [-x]"; exit 1; }
+usage() {
+	printf "Usage: vvv [-a create|delete|list] [-n site] [-v version] [-d domain] [-p path/to/vvv] [-f] [-x]\n\n"\
+"Options:\n"\
+"-a   action      Can be create, delete, or list\n"\
+"-d   domain      Desired domain (e.g. mysite.dev)\n"\
+"-f   files only  Do not provision Vagrant, just create the site directory and files\n"\
+"-n   site name   Desired name for the site directory (e.g. mysite)\n"\
+"-p   path        Path to VVV root (e.g. ~/vagrant-local)\n"\
+"-v   version     Version of WordPress to install\n"\
+"-x   debug       Turn on WP_DEBUG and WP_DEBUG_LOG\n"\
+"\n"
+	exit 1;
+}
 
 # =============================================================================
 # Helper function since a green "Done." is used in a lot of places
