@@ -16,15 +16,15 @@ Type `vvv` in the command line to use. None of the options are required: if a re
 
 ### Options
 
-|    |Option     |Description|
-|----|-----------|-----------|
-|`-a`|action     |`new`/`create`/`make` runs the site creation wizard, `rm`/`delete`/`teardown` runs the site teardown wizard, `list` lists all current VVV sites|
-|`-d`|domain     |Desired domain (e.g. mysite.dev)|
-|`-f`|files only |Do not provision Vagrant, just create the site directory and files|
-|`-n`|site name  |Desired name for the site directory (e.g. mysite)|
-|`-p`|path       |Path to VVV root (e.g. ~/vagrant-local)|
-|`-v`|version    |Version of WordPress to install|
-|`-x`|debug      |Turn on WP_DEBUG and WP_DEBUG_LOG|
+|Option|Name       |Description|
+|------|-----------|-----------|
+|`-a`  |action     |`new`/`create`/`make` runs the site creation wizard, `rm`/`delete`/`teardown` runs the site teardown wizard, `list` lists all current VVV sites|
+|`-d`  |domain     |Desired domain (e.g. mysite.dev)|
+|`-f`  |files only |Do not provision Vagrant, just create the site directory and files|
+|`-n`  |site name  |Desired name for the site directory (e.g. mysite)|
+|`-p`  |path       |Path to VVV root (e.g. ~/vagrant-local)|
+|`-v`  |version    |Version of WordPress to install|
+|`-x`  |debug      |Turn on WP_DEBUG and WP_DEBUG_LOG|
 
 Examples:
 
