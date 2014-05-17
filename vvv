@@ -84,9 +84,39 @@ cecho() {
 # =============================================================================
 # Vaaaaaars!
 # =============================================================================
-action=$1
-site=$2
-files_only=$3
+files_only=false
+wp_debug=false
+
+while getopts ":a::n::v::p::f:d" opt; do
+	case $opt in
+		a)
+			action=$OPTARG >&2
+			;;
+		n)
+			site=$OPTARG >&2
+			;;
+		f)
+			files_only=true >&2
+			;;
+		v)
+			version=$OPTARG >&2
+			;;
+		p)
+			path=$OPTARG >&2
+			;;
+		d)
+			wp_debug=true >&2
+			;;
+		\?)
+			cecho "Invalid option: -$OPTARG" red
+			exit 1
+			;;
+		:)
+			cecho "Option -$OPTARG requires an argument" red
+			exit 1
+			;;
+	esac
+done
 
 # =============================================================================
 # Get the VVV root directory if the user is entering a valid command
