@@ -87,7 +87,7 @@ cecho() {
 files_only=false
 wp_debug=false
 
-while getopts ":a::n::v::p::f:d:x" opt; do
+while getopts "xfa:n:v:p:d:" opt; do
 	case $opt in
 		a)
 			action=$OPTARG >&2
