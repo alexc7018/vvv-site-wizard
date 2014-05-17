@@ -5,15 +5,14 @@
 # By Alison Barrett <alison@barre.tt>
 # https://github.com/aliso/vvv-site-wizard
 #
-# Version 1.0
+# Version 1.1
 #
 # This script automates the creation & deletion of new WordPress sites using
 # Varying Vagrant Vagrants (https://github.com/Varying-Vagrant-Vagrants/VVV).
 #
 # Usage:
-# vvv new|create|make [site]
-# vvv delete|rm|teardown [site]
-# vvv list
+# vvv [-a create|delete|list] [-n site] [-v version] [-d domain]
+# [-p path/to/vvv] [-f] [-x]
 # =============================================================================
 #
 # When not called from the VVV root directory, the script will prompt the user
@@ -24,7 +23,19 @@
 # =============================================================================
 # Helper function for printing out usage information.
 # =============================================================================
-usage() { echo -e "Usage: vvv new|create|make [site]\n       vvv delete|rm|teardown [site]\n       vvv list"; exit 1; }
+usage() {
+	printf "Usage: vvv [-a create|delete|list] [-n site] [-v version] [-d domain] [-p path/to/vvv] [-f] [-x]\n\n"\
+"Options:\n"\
+"-a   action      Can be create, delete, or list\n"\
+"-d   domain      Desired domain (e.g. mysite.dev)\n"\
+"-f   files only  Do not provision Vagrant, just create the site directory and files\n"\
+"-n   site name   Desired name for the site directory (e.g. mysite)\n"\
+"-p   path        Path to VVV root (e.g. ~/vagrant-local)\n"\
+"-v   version     Version of WordPress to install\n"\
+"-x   debug       Turn on WP_DEBUG and WP_DEBUG_LOG\n"\
+"\n"
+	exit 1;
+}
 
 # =============================================================================
 # Helper function since a green "Done." is used in a lot of places
@@ -82,11 +93,66 @@ cecho() {
 }
 
 # =============================================================================
+# Help
+# =============================================================================
+if [[ "$1" = 'help' || "$1" = '-h' ]]; then
+	usage
+	exit 1
+fi
+
+# =============================================================================
 # Vaaaaaars!
 # =============================================================================
-action=$1
-site=$2
-files_only=$3
+files_only=false
+wp_debug=false
+
+while getopts "xfa:n:v:p:d:" opt; do
+	case $opt in
+		a)
+			action=$OPTARG >&2
+			;;
+		n)
+			site=$OPTARG >&2
+			;;
+		f)
+			files_only=true >&2
+			;;
+		v)
+			version=$OPTARG >&2
+			;;
+		p)
+			path=$OPTARG >&2
+			;;
+		d)
+			domain=$OPTARG >&2
+			;;
+		x)
+			wp_debug=true >&2
+			;;
+		\?)
+			cecho "Invalid option: -$OPTARG" red
+			exit 1
+			;;
+		:)
+			cecho "Option -$OPTARG requires an argument" red
+			exit 1
+			;;
+	esac
+done
+
+# =============================================================================
+# Get the action if it was not specified
+# =============================================================================
+while [ -z $action ]; do
+	read -e -p "Action (create|delete|list): " action
+
+	if [ -z $action ]; then
+		cecho "You must choose an action." red
+	elif [[ $action != 'create' && $action != 'delete' && $action != 'list' ]]; then
+		cecho "Answer create, delete, or list." red
+		unset action
+	fi
+done
 
 # =============================================================================
 # Get the VVV root directory if the user is entering a valid command
@@ -133,7 +199,11 @@ fi
 # =============================================================================
 if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
-	cecho "\nNew VVV Site Setup" blue bold
+	files_only_text=''
+	if [[ "$files_only" = true ]]; then
+		files_only_text=" (file creation only)"
+	fi
+	cecho "\nNew VVV Site Setup$files_only_text" blue bold
 
 	# Prompt user for vars
 	# =============================================================================
@@ -158,10 +228,22 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	db_name=$site
 
 	# Get local URL
-	echo -n "Domain to use (leave blank for $site.dev): "
-	read domain
-	if [ -z $domain ]; then
-		domain="$site.dev"
+	while [ -z $domain ]; do
+		echo -n "Domain to use (leave blank for $site.dev): "
+		read domain
+		if [ -z $domain ]; then
+			domain="$site.dev"
+		fi
+	done
+
+	if [ ! -z $version ]; then
+		# Attempt to verify the existence of the version (hacky)
+		if curl -s http://codex.wordpress.org/Version_$version | grep 'currently no text' > /dev/null; then
+			cecho "Version $version not found, try again" red
+			unset version
+		else
+			installversion=" --version=$version"
+		fi
 	fi
 
 	while [[ -z $version ]]; do
@@ -196,14 +278,14 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# =============================================================================
 	cecho "\nAbout to perform the following:" normal bold
 	echo -e "* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
-	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
+	if [[ "$files_only" = false ]]; then
 		echo -e "* Run \`vagrant up --provision\` to initialize site"
 	else
 		cecho "\nNote: You will need to run \`vagrant up --provision\` to initialize the new site before $domain will load in a browser." red
 	fi
 
-	cecho "\nWhen Vagrant is provisioned:" default bold
-	echo -e "* The database '$site' will be created\n* WordPress $version will be installed in the htdocs directory"
+	cecho "\nProvisioning Vagrant will do the following:" default bold
+	echo -e "* Create database $site\n* Install WordPress $version in the htdocs directory\n* Make the site visible at $domain"
 
 	echo -en "\n"
 	while [ -z $continue_create ]; do
@@ -275,14 +357,14 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# vagrant waaaaay up
 	# =============================================================================
 	cd $path
-	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
+	if [[ "$files_only" = false ]]; then
 		echo -e "Running vagrant up --provision... "
 		vagrant up --provision
 	fi
 
 	# OMG we're done.
 	# =============================================================================
-	if [[ ! -z $files_only && $files_only == 'filesonly' ]]; then
+	if [[ "$files_only" = true ]]; then
 		cecho "\nRemember to run \`vagrant up --provision\` to initialize the new site." red
 	fi
 
