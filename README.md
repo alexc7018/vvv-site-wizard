@@ -12,13 +12,29 @@ If you don't want to define the path each time you run the script, open the file
 
 ## Usage
 
-Type `vvv` in the command line to use. When running the site setup or teardown wizards, you can include the desired name of your site's directory as a parameter. Example: `vvv new testsite`
+Type `vvv` in the command line to use. None of the options are required: if a required piece of information is not included in the original command, the wizard will prompt you for it.
 
-### `vvv list`
+### Options
 
-This lists all the sites currently in VVV's `www` folder.
+|    |Option     |Description|
+|----|-----------|-----------|
+|`-a`|action     |`new`/`create`/`make` runs the site creation wizard, `rm`/`delete`/`teardown` runs the site teardown wizard, `list` lists all current VVV sites|
+|`-d`|domain     |Desired domain (e.g. mysite.dev)|
+|`-f`|files only |Do not provision Vagrant, just create the site directory and files|
+|`-n`|site name  |Desired name for the site directory (e.g. mysite)|
+|`-p`|path       |Path to VVV root (e.g. ~/vagrant-local)|
+|`-v`|version    |Version of WordPress to install|
+|`-x`|debug      |Turn on WP_DEBUG and WP_DEBUG_LOG|
 
-### `vvv new|create|make [site]`
+Examples:
+
+```
+vvv -a list
+vvv -a new -n mysite -d mysite.dev -v 3.9.1 -x
+vvv -a delete mysite
+```
+
+## Site Creation Wizard
 
 Creating a site does the following:
 
@@ -32,11 +48,7 @@ Creating a site does the following:
 
 Provisioning Vagrant takes a couple of minutes, but this is a crucial step as it downloads WordPress into your site's htdocs directory and runs the installation. If you want to skip provisioning and install WordPress manually, you can run the new site's `vvv-init.sh` file directly in the Vagrant shell.
 
-#### `vvv new|create|make [site] [filesonly]`
-
-Adding the `filesonly` parameter to this command will do everything in the list above except restart Vagrant. This is useful for testing the script quickly, or if you're creating multiple sites (as provisioning Vagrant takes a while).
-
-### `vvv delete|rm|teardown [site]`
+## Site Teardown Wizard
 
 Deleting a site does the following:
 
