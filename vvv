@@ -164,7 +164,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		domain="$site.dev"
 	fi
 
-	while [ -z $version ]; do
+	while [[ -z $version ]]; do
 		# Get WordPress version
 		echo -n "WordPress version to install (leave blank for release version): "
 		read version
