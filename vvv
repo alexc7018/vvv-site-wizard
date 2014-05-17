@@ -203,7 +203,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	fi
 
 	cecho "\nWhen Vagrant is provisioned:" default bold
-	echo -e "* The database '$site' will be created\n* WordPress $version will be installed in the htdocs directory"
+	echo -e "* The database '$site' will be created\n* WordPress $version will be installed in the htdocs directory\n* The site will be visible at $domain"
 
 	echo -en "\n"
 	while [ -z $continue_create ]; do
