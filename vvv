@@ -87,7 +87,7 @@ cecho() {
 files_only=false
 wp_debug=false
 
-while getopts ":a::n::v::p::f:d" opt; do
+while getopts ":a::n::v::p::f:d:x" opt; do
 	case $opt in
 		a)
 			action=$OPTARG >&2
@@ -105,6 +105,9 @@ while getopts ":a::n::v::p::f:d" opt; do
 			path=$OPTARG >&2
 			;;
 		d)
+			domain=$OPTARG >&2
+			;;
+		x)
 			wp_debug=true >&2
 			;;
 		\?)
