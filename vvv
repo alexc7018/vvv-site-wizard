@@ -122,6 +122,20 @@ while getopts ":a::n::v::p::f:d:x" opt; do
 done
 
 # =============================================================================
+# Get the action if it was not specified
+# =============================================================================
+while [ -z $action ]; do
+	read -e -p "Action (create|delete|list): " action
+
+	if [ -z $action ]; then
+		cecho "You must choose an action." red
+	elif [[ $action != 'create' && $action != 'delete' && $action != 'list' ]]; then
+		cecho "Answer create, delete, or list." red
+		unset action
+	fi
+done
+
+# =============================================================================
 # Get the VVV root directory if the user is entering a valid command
 #
 # This is placed outside of the action conditionals below because setting the
