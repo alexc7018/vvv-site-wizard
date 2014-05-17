@@ -180,7 +180,11 @@ fi
 # =============================================================================
 if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
-	cecho "\nNew VVV Site Setup" blue bold
+	files_only_text=''
+	if [[ "$files_only" = true ]]; then
+		files_only_text=" (file creation only)"
+	fi
+	cecho "\nNew VVV Site Setup$files_only_text" blue bold
 
 	# Prompt user for vars
 	# =============================================================================
