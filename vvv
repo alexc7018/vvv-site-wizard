@@ -224,10 +224,17 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
-	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
+	cecho "\nAbout to perform the following:" normal bold
+	echo -e "* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
 	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
 		echo -e "* Run \`vagrant up --provision\` to initialize site"
+	else
+		cecho "\nNote: You will need to run \`vagrant up --provision\` to initialize the new site before $domain will load in a browser." red
 	fi
+
+	cecho "\nWhen Vagrant is provisioned:" default bold
+	echo -e "* The database '$site' will be created\n* WordPress $version will be installed in the htdocs directory"
+
 	echo -en "\n"
 	while [ -z $continue_create ]; do
 		echo -n "Continue (y/n)? "
@@ -306,7 +313,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# OMG we're done.
 	# =============================================================================
 	if [[ ! -z $files_only && $files_only == 'filesonly' ]]; then
-		cecho "\nNote: You must run \`vagrant up --provision\` to initialize the new site before $domain will load in a browser." red
+		cecho "\nRemember to run \`vagrant up --provision\` to initialize the new site." red
 	fi
 
 	cecho "\nNew VVV Site Setup: Done!" blue bold
