@@ -11,9 +11,8 @@
 # Varying Vagrant Vagrants (https://github.com/Varying-Vagrant-Vagrants/VVV).
 #
 # Usage:
-# vvv new|create|make [site]
-# vvv delete|rm|teardown [site]
-# vvv list
+# vvv [-a create|delete|list] [-n site] [-v version] [-d domain]
+# [-p path/to/vvv] [-f] [-x]
 # =============================================================================
 #
 # When not called from the VVV root directory, the script will prompt the user
@@ -24,7 +23,7 @@
 # =============================================================================
 # Helper function for printing out usage information.
 # =============================================================================
-usage() { echo -e "Usage: vvv new|create|make [site]\n       vvv delete|rm|teardown [site]\n       vvv list"; exit 1; }
+usage() { echo -e "Usage: vvv [-a create|delete|list] [-n site] [-v version] [-d domain] [-p path/to/vvv] [-f] [-x]"; exit 1; }
 
 # =============================================================================
 # Helper function since a green "Done." is used in a lot of places
