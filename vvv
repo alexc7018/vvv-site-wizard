@@ -237,7 +237,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 "if [ ! -d \"htdocs\" ]; then\n"\
 "\techo 'Installing WordPress $version in $site/htdocs...'\n"\
 "\tmkdir ./htdocs\ncd ./htdocs\n"\
-"\twp core download --allow-root $installversion\n"
+"\twp core download --allow-root $installversion\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root$wp_debug_text\n"\
 "\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
 "\t\tcd -\n"\
