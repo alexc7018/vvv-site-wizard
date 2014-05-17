@@ -173,7 +173,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 			version="(release version)"
 		else
 			# Attempt to verify the existence of the version (hacky)
-			if curl -s http://codex.wordpress.org/Version_$version | grep 'currently no text' > ok; then
+			if curl -s http://codex.wordpress.org/Version_$version | grep 'currently no text' > /dev/null; then
 				cecho "Version $version not found, try again" red
 				unset version
 			else
