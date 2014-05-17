@@ -255,7 +255,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# =============================================================================
 	cecho "\nAbout to perform the following:" normal bold
 	echo -e "* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
-	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
+	if [[ "$files_only" = false ]]; then
 		echo -e "* Run \`vagrant up --provision\` to initialize site"
 	else
 		cecho "\nNote: You will need to run \`vagrant up --provision\` to initialize the new site before $domain will load in a browser." red
@@ -334,14 +334,14 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# vagrant waaaaay up
 	# =============================================================================
 	cd $path
-	if [[ -z $files_only || $files_only != 'filesonly' ]]; then
+	if [[ "$files_only" = false ]]; then
 		echo -e "Running vagrant up --provision... "
 		vagrant up --provision
 	fi
 
 	# OMG we're done.
 	# =============================================================================
-	if [[ ! -z $files_only && $files_only == 'filesonly' ]]; then
+	if [[ "$files_only" = true ]]; then
 		cecho "\nRemember to run \`vagrant up --provision\` to initialize the new site." red
 	fi
 
