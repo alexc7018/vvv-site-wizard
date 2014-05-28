@@ -33,9 +33,11 @@ Type `vvv` in the command line to use. None of the options are required: if a re
 Examples:
 
 ```
-vvv -a list
-vvv -a new -n mysite -d mysite.dev -v 3.9.1 -x
+vvv -a new
+vvv -a create -n mysite -d mysite.dev -v 3.9.1 -x
+vvv -a make -fxil mysite.com -n mysite -d mysite.dev -v 3.9.1
 vvv -a delete mysite
+vvv -a list
 ```
 
 ## Site Creation Wizard
