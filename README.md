@@ -67,3 +67,29 @@ Note that it does not delete the site's database.
 ## Questions?
 
 Ping me on Twitter at [@alisothegeek](http://twitter.com/alisothegeek).
+
+## Changelog
+
+### 1.1.2
+
+* Add the ability to load images by proxy from the live site (props @TheLastCicada)
+* Fix bug where wp_debug was not set properly when set via command option
+
+### 1.1.1
+
+* Add default VVV install path to script (if VVV is installed in default location, `path` no longer needs to be explicitly defined)
+
+### 1.1
+
+* Add ability to select WordPress version (props @adamsilverstein)
+* Add ability to define `WP_DEBUG` and `WP_DEBUG_LOG`
+* Convert positional parameters to command line options for maximum flexibility
+
+### 1.0.1
+
+* Switch to using WP-CLI instead of SVN to install WordPress
+* Allow for tab completions when defining directories
+
+### 1.0
+
+* Initial release
