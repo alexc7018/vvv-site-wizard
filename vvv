@@ -168,6 +168,8 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'de
 		current_dir=`pwd`
 		if [ -e "$current_dir/Vagrantfile" ]; then
 			path=`pwd`
+		elif [ -e ~/vagrant-local/Vagrantfile ]; then
+			path=~/vagrant-local
 		else
 			while [ -z $path ]; do
 				read -e -p "VVV install directory: " path
