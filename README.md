@@ -72,7 +72,7 @@ Ping me on Twitter at [@alisothegeek](http://twitter.com/alisothegeek).
 
 ### 1.1.2
 
-* Add the ability to load images by proxy from the live site (props @TheLastCicada)
+* Add the ability to load images by proxy from the live site (props [@TheLastCicada](https://gist.github.com/TheLastCicada/ee6775c5f269f5f5389f))
 * Fix bug where wp_debug was not set properly when set via command option
 
 ### 1.1.1
@@ -81,7 +81,7 @@ Ping me on Twitter at [@alisothegeek](http://twitter.com/alisothegeek).
 
 ### 1.1
 
-* Add ability to select WordPress version (props @adamsilverstein)
+* Add ability to select WordPress version (props [@adamsilverstein](https://github.com/aliso/vvv-site-wizard/pull/10))
 * Add ability to define `WP_DEBUG` and `WP_DEBUG_LOG`
 * Convert positional parameters to command line options for maximum flexibility
 
