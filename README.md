@@ -1,6 +1,6 @@
 # VVV Site Wizard
 
-Version 1.1.1
+Version 1.1.2
 
 This bash script makes it easy to spin up a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
@@ -23,6 +23,8 @@ Type `vvv` in the command line to use. None of the options are required: if a re
 |`-a`  |action     |`new`/`create`/`make` runs the site creation wizard, `rm`/`delete`/`teardown` runs the site teardown wizard, `list` lists all current VVV sites|
 |`-d`  |domain     |Desired domain (e.g. mysite.dev)|
 |`-f`  |files only |Do not provision Vagrant, just create the site directory and files|
+|`-i`  |image proxy|Load images by proxy from the live site (so you don't have to download the uploads folder)|
+|`-l`  |live URL   |URL of the live site, currently only used if loading images by proxy|
 |`-n`  |site name  |Desired name for the site directory (e.g. mysite)|
 |`-p`  |path       |Path to VVV root (e.g. ~/vagrant-local)|
 |`-v`  |version    |Version of WordPress to install|
@@ -31,9 +33,11 @@ Type `vvv` in the command line to use. None of the options are required: if a re
 Examples:
 
 ```
-vvv -a list
-vvv -a new -n mysite -d mysite.dev -v 3.9.1 -x
+vvv -a new
+vvv -a create -n mysite -d mysite.dev -v 3.9.1 -x
+vvv -a make -fxil mysite.com -n mysite -d mysite.dev -v 3.9.1
 vvv -a delete mysite
+vvv -a list
 ```
 
 ## Site Creation Wizard
@@ -63,3 +67,29 @@ Note that it does not delete the site's database.
 ## Questions?
 
 Ping me on Twitter at [@alisothegeek](http://twitter.com/alisothegeek).
+
+## Changelog
+
+### 1.1.2
+
+* Add the ability to load images by proxy from the live site (props @TheLastCicada)
+* Fix bug where wp_debug was not set properly when set via command option
+
+### 1.1.1
+
+* Add default VVV install path to script (if VVV is installed in default location, `path` no longer needs to be explicitly defined)
+
+### 1.1
+
+* Add ability to select WordPress version (props @adamsilverstein)
+* Add ability to define `WP_DEBUG` and `WP_DEBUG_LOG`
+* Convert positional parameters to command line options for maximum flexibility
+
+### 1.0.1
+
+* Switch to using WP-CLI instead of SVN to install WordPress
+* Allow for tab completions when defining directories
+
+### 1.0
+
+* Initial release
