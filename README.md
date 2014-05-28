@@ -1,5 +1,7 @@
 # VVV Site Wizard
 
+Version 1.1.1
+
 This bash script makes it easy to spin up a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
 ## Installation
