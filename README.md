@@ -1,5 +1,7 @@
 # VVV Site Wizard
 
+Version 1.1.1
+
 This bash script makes it easy to spin up a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
 ## Installation
@@ -8,7 +10,7 @@ Download the script and run `./vvv` from the directory the script is placed in.
 
 To run the script from anywhere, you can place `vvv` in a folder included in your PATH environment variable.
 
-If you don't want to define the path each time you run the script, open the file and uncomment the line at the top defining `path`. Set that to the root folder of VVV on your machine.
+If you don't want to define the path each time you run the script, open the file and uncomment the line at the top defining `path`. Set that to the root folder of VVV on your machine. **Note:** You do not need to do this if VVV is installed in the default location (`~/vagrant-local/`).
 
 ## Usage
 
