@@ -127,7 +127,7 @@ while getopts "xfa:n:v:p:d:" opt; do
 			domain=$OPTARG >&2
 			;;
 		x)
-			wp_debug=true >&2
+			wp_debug=y >&2
 			;;
 		\?)
 			cecho "Invalid option: -$OPTARG" red
