@@ -5,7 +5,7 @@
 # By Alison Barrett <alison@barre.tt>
 # https://github.com/aliso/vvv-site-wizard
 #
-# Version 1.1.2
+# Version 1.1.3
 #
 # This script automates the creation & deletion of new WordPress sites using
 # Varying Vagrant Vagrants (https://github.com/Varying-Vagrant-Vagrants/VVV).
@@ -31,6 +31,7 @@ usage() {
 "-f   files only  Do not provision Vagrant, just create the site directory and files\n"\
 "-i   image proxy Load images by proxy from the live site (so you don't have to download the uploads folder)\n"\
 "-l   live URL    URL of the live site, currently only used if loading images by proxy\n"\
+"-m   multisite   Install as a multisite network\n"\
 "-n   site name   Desired name for the site directory (e.g. mysite)\n"\
 "-p   path        Path to VVV root (e.g. ~/vagrant-local)\n"\
 "-v   version     Version of WordPress to install\n"\
@@ -108,7 +109,7 @@ fi
 files_only=false
 wp_debug=false
 
-while getopts "xfil:a:n:v:p:d:" opt; do
+while getopts "xfiml:a:n:v:p:d:" opt; do
 	case $opt in
 		a)
 			action=$OPTARG >&2
@@ -136,6 +137,9 @@ while getopts "xfil:a:n:v:p:d:" opt; do
 			;;
 		l)
 			live_site_url=$OPTARG >&2
+			;;
+		m)
+			multisite=true >&2
 			;;
 		\?)
 			cecho "Invalid option: -$OPTARG" red
@@ -346,6 +350,11 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		wp_debug_text=" --extra-php <<PHP\ndefine('WP_DEBUG', true);\ndefine('WP_DEBUG_LOG', true);\nPHP"
 	fi
 
+	install_text='install'
+	if [[ "$multisite" = true ]]; then
+		install_text='multisite-install'
+	fi
+
 	printf "echo \"Creating database '$site' (if it does not exist)...\"\n\n"\
 "mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
 "mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n\n"\
@@ -354,7 +363,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 "\tmkdir ./htdocs\ncd ./htdocs\n"\
 "\twp core download --allow-root $installversion\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root$wp_debug_text\n"\
-"\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
+"\twp core $install_text --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
 "\t\tcd -\n"\
 "else\n"\
 "\techo 'Updating WordPress in $site/htdocs...'\n"\
