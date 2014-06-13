@@ -31,7 +31,7 @@ usage() {
 "-f   files only  Do not provision Vagrant, just create the site directory and files\n"\
 "-i   image proxy Load images by proxy from the live site (so you don't have to download the uploads folder)\n"\
 "-l   live URL    URL of the live site, currently only used if loading images by proxy\n"\
-"-m   multisite   Install as a multisite network\n"\
+"-m   multisite   Install as a multisite network (takes argument: 'subdirectory' or 'subdomain')\n"\
 "-n   site name   Desired name for the site directory (e.g. mysite)\n"\
 "-p   path        Path to VVV root (e.g. ~/vagrant-local)\n"\
 "-v   version     Version of WordPress to install\n"\
