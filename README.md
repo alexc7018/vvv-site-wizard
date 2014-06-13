@@ -1,6 +1,6 @@
 # VVV Site Wizard
 
-Version 1.1.2
+Version 1.2
 
 This bash script makes it easy to spin up a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
@@ -70,6 +70,11 @@ Note that it does not delete the site's database.
 Ping me on Twitter at [@alisothegeek](http://twitter.com/alisothegeek).
 
 ## Changelog
+
+### 1.2
+
+* Add multisite option (works with both subdirectory and subdomain installs)
+* Move database creation to `database/init-custom.sql`
 
 ### 1.1.2
 
