@@ -437,7 +437,7 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 
 	# Start the deletion par-tay
 	# =============================================================================
-	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Delete directory $site in $path/www\n* Delete file $site.conf in $path/config/nginx-config/sites\n"
+	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Delete directory $site in $path/www\n* Delete file $site.conf in $path/config/nginx-config/sites\n* Remove database creation commands from init-custom.sql\n"
 	while [ -z $continue_delete ]; do
 		echo -n "Continue (y/n)? "
 		read continue_delete
