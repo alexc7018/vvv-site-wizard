@@ -1,6 +1,6 @@
 # VVV Site Wizard
 
-Version 1.1.2
+Version 1.1.3
 
 This bash script makes it easy to spin up a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
@@ -73,6 +73,11 @@ Note that it does not delete the site's database.
 Ping me on Twitter at [@alisothegeek](http://twitter.com/alisothegeek).
 
 ## Changelog
+
+### 1.1.3
+
+* Fix forward slashes in a live site URL (used for the image proxy) causing an error
+* Fix done_text implementation in the site teardown wizard
 
 ### 1.1.2
 
