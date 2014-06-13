@@ -346,23 +346,24 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		wp_debug_text=" --extra-php <<PHP\ndefine('WP_DEBUG', true);\ndefine('WP_DEBUG_LOG', true);\nPHP"
 	fi
 
-	printf "echo \"Creating database '$site' (if it does not exist)...\"\n\n"\
-"mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
-"mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n\n"\
-"if [ ! -d \"htdocs\" ]; then\n"\
+	printf "if [ ! -d \"htdocs\" ]; then\n"\
 "\techo 'Installing WordPress $version in $site/htdocs...'\n"\
 "\tmkdir ./htdocs\ncd ./htdocs\n"\
 "\twp core download --allow-root $installversion\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root$wp_debug_text\n"\
 "\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
 "\t\tcd -\n"\
-"else\n"\
-"\techo 'Updating WordPress in $site/htdocs...'\n"\
-"\twp core update --allow-root\n"\
-"\twp core update-db --allow-root\n"\
 "fi\n" > vvv-init.sh
 
 	done_text
+
+	# Create SQL commands for database creation
+    # =============================================================================
+    if [ ! -e $path/database/init-custom.sql ]; then
+		touch $path/database/init-custom.sql
+    fi
+    printf "CREATE DATABASE IF NOT EXISTS \`$db_name\`;\n"\
+"GRANT ALL PRIVILEGES ON \`$db_name\`.* TO 'wp'@'localhost' IDENTIFIED BY 'wp';\n" >> $path/database/init-custom.sql
 
 	# Add vvv-hosts file for domain in the site's www root
 	# =============================================================================
@@ -436,7 +437,7 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 
 	# Start the deletion par-tay
 	# =============================================================================
-	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Delete directory $site in $path/www\n* Delete file $site.conf in $path/config/nginx-config/sites\n"
+	echo -e "\nAbout to perform the following:\n\n* Halt Vagrant (if running)\n* Delete directory $site in $path/www\n* Delete file $site.conf in $path/config/nginx-config/sites\n* Remove database creation commands from init-custom.sql\n"
 	while [ -z $continue_delete ]; do
 		echo -n "Continue (y/n)? "
 		read continue_delete
@@ -455,6 +456,15 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 			echo -en "Removing nginx config file $site.conf... "
 			rm $path/config/nginx-config/sites/$site.conf
 			echo -e $done_text
+
+			# Remove the database creation from init-custom.sql
+			echo -en "Removing the database creation commands from init-custom.sql... "
+			cd $path/database
+			sed "/\`$site\`/d" < init-custom.sql > init-custom.sql.tmp
+			rm init-custom.sql
+			mv init-custom.sql.tmp init-custom.sql
+			cd -
+			done_text
 
 			# Delorted.
 			cecho "\nVVV Site Teardown: Done!" blue bold
