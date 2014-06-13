@@ -31,6 +31,7 @@ usage() {
 "-f   files only  Do not provision Vagrant, just create the site directory and files\n"\
 "-i   image proxy Load images by proxy from the live site (so you don't have to download the uploads folder)\n"\
 "-l   live URL    URL of the live site, currently only used if loading images by proxy\n"\
+"-m   multisite   Install as a multisite network (takes argument: 'subdirectory' or 'subdomain')\n"\
 "-n   site name   Desired name for the site directory (e.g. mysite)\n"\
 "-p   path        Path to VVV root (e.g. ~/vagrant-local)\n"\
 "-v   version     Version of WordPress to install\n"\
@@ -108,7 +109,7 @@ fi
 files_only=false
 wp_debug=false
 
-while getopts "xfil:a:n:v:p:d:" opt; do
+while getopts "xfim:l:a:n:v:p:d:" opt; do
 	case $opt in
 		a)
 			action=$OPTARG >&2
@@ -137,6 +138,9 @@ while getopts "xfil:a:n:v:p:d:" opt; do
 		l)
 			live_site_url=$OPTARG >&2
 			;;
+		m)
+			multisite=$OPTARG >&2
+			;;
 		\?)
 			cecho "Invalid option: -$OPTARG" red
 			exit 1
@@ -147,6 +151,14 @@ while getopts "xfil:a:n:v:p:d:" opt; do
 			;;
 	esac
 done
+
+# If multisite was flagged, make sure it's a valid value
+if [[ ! -z $multisite ]]; then
+	if [[ $multisite != 'subdomain' && $multisite != 'subdirectory' ]]; then
+		cecho "The multisite parameter must be set to 'subdomain' or 'subdirectory.'" red
+		exit 1
+	fi
+fi
 
 # =============================================================================
 # Get the action if it was not specified
@@ -300,6 +312,13 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		done
 	fi
 
+	# If doing a subdomain multisite install, ask for subdomains to add to nginx.conf
+	if [[ $multisite = 'subdomain' ]]; then
+		while [ -z "$multisite_domains" ]; do
+			read -e -p "Multisite subdomains (no http:// or trailing slash, separated by spaces): " multisite_domains
+		done
+	fi
+
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
 	cecho "\nAbout to perform the following:" normal bold
@@ -346,12 +365,19 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		wp_debug_text=" --extra-php <<PHP\ndefine('WP_DEBUG', true);\ndefine('WP_DEBUG_LOG', true);\nPHP"
 	fi
 
+	install_text='install'
+	if [[ $multisite = 'subdomain' ]]; then
+		install_text='multisite-install --subdomains'
+	elif [[ $multisite = 'subdirectory' ]]; then
+		install_text='multisite-install'
+	fi
+
 	printf "if [ ! -d \"htdocs\" ]; then\n"\
 "\techo 'Installing WordPress $version in $site/htdocs...'\n"\
 "\tmkdir ./htdocs\ncd ./htdocs\n"\
 "\twp core download --allow-root $installversion\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root$wp_debug_text\n"\
-"\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
+"\twp core $install_text --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
 "\t\tcd -\n"\
 "fi\n" > vvv-init.sh
 
@@ -370,14 +396,25 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	cd $path/www/$site
 	echo -en "Adding $domain to new vvv-hosts file... "
 	touch vvv-hosts
-	printf "$domain\n" >> vvv-hosts
+	printf "$domain\n" > vvv-hosts
+	if [[ $multisite = 'subdomain' ]]; then
+		printf "$multisite_domains\n" > vvv-hosts-2
+		tr -s ' ' '\n' < vvv-hosts-2 >> vvv-hosts
+		rm vvv-hosts-2
+	fi
 	done_text
 
 	# Add site conf file to nginx-config
 	# =============================================================================
 	cd $path/config/nginx-config/sites
 	echo -en "Creating nginx-config/sites/$site.conf... "
-	sed -e "s/testserver\.com/$domain/" \
+
+	nginx_domain_text="$domain"
+	if [[ $multisite = 'subdomain' ]]; then
+		nginx_domain_text="$domain $multisite_domains"
+	fi
+
+	sed -e "s/testserver\.com/$nginx_domain_text/" \
 		-e "s/wordpress-local/$site\/htdocs/" local-nginx-example.conf-sample > $site.conf
 
 	if [[ $image_proxy = 'y' ]]; then

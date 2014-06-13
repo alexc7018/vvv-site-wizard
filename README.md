@@ -25,6 +25,7 @@ Type `vvv` in the command line to use. None of the options are required: if a re
 |`-f`  |files only |Do not provision Vagrant, just create the site directory and files|
 |`-i`  |image proxy|Load images by proxy from the live site (so you don't have to download the uploads folder)|
 |`-l`  |live URL   |URL of the live site, currently only used if loading images by proxy|
+|`-m`  |multisite  |Install as a multisite network (takes argument: 'subdirectory' or 'subdomain')|
 |`-n`  |site name  |Desired name for the site directory (e.g. mysite)|
 |`-p`  |path       |Path to VVV root (e.g. ~/vagrant-local)|
 |`-v`  |version    |Version of WordPress to install|
