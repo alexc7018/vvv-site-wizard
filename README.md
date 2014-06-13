@@ -80,6 +80,11 @@ Ping me on Twitter at [@alisothegeek](http://twitter.com/alisothegeek).
 * Add multisite option (works with both subdirectory and subdomain installs)
 * Move database creation to `database/init-custom.sql`
 
+### 1.1.3
+
+* Fix forward slashes in a live site URL (used for the image proxy) causing an error
+* Fix done_text implementation in the site teardown wizard
+
 ### 1.1.2
 
 * Add the ability to load images by proxy from the live site (props [@TheLastCicada](https://gist.github.com/TheLastCicada/ee6775c5f269f5f5389f))
