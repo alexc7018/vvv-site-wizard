@@ -4,6 +4,10 @@ Version 1.2
 
 This bash script makes it easy to spin up a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
+> ## Develop Branch
+>
+> The develop branch contains the latest and greatest updates, but is not necessarily stable. Updates are merged into master after being tested for a while. [Check it out!](https://github.com/aliso/vvv-site-wizard/tree/develop)
+
 ## Installation
 
 Download the script and run `./vvv` from the directory the script is placed in.
