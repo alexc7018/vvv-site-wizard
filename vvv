@@ -395,7 +395,12 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	cd $path/www/$site
 	echo -en "Adding $domain to new vvv-hosts file... "
 	touch vvv-hosts
-	printf "$domain\n" >> vvv-hosts
+	printf "$domain\n" > vvv-hosts
+	if [[ $multisite = 'subdomain' ]]; then
+		printf "$multisite_domains\n" > vvv-hosts-2
+		tr -s ' ' '\n' < vvv-hosts-2 >> vvv-hosts
+		rm vvv-hosts-2
+	fi
 	done_text
 
 	# Add site conf file to nginx-config
