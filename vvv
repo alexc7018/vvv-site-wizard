@@ -356,10 +356,6 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root$wp_debug_text\n"\
 "\twp core install --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
 "\t\tcd -\n"\
-"else\n"\
-"\techo 'Updating WordPress in $site/htdocs...'\n"\
-"\twp core update --allow-root\n"\
-"\twp core update-db --allow-root\n"\
 "fi\n" > vvv-init.sh
 
 	done_text
