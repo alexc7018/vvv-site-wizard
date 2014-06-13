@@ -362,7 +362,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
     if [ ! -e $path/database/init-custom.sql ]; then
 		touch $path/database/init-custom.sql
     fi
-    printf "\nCREATE DATABASE IF NOT EXISTS \`$db_name\`;\n"\
+    printf "CREATE DATABASE IF NOT EXISTS \`$db_name\`;\n"\
 "GRANT ALL PRIVILEGES ON \`$db_name\`.* TO 'wp'@'localhost' IDENTIFIED BY 'wp';\n" >> $path/database/init-custom.sql
 
 	# Add vvv-hosts file for domain in the site's www root
