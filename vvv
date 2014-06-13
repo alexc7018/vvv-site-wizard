@@ -156,7 +156,7 @@ done
 if [[ ! -z $multisite ]]; then
 	if [[ $multisite != 'subdomain' && $multisite != 'subdirectory' ]]; then
 		cecho "The multisite parameter must be set to 'subdomain' or 'subdirectory.'" red
-		exit
+		exit 1
 	fi
 fi
 
@@ -314,7 +314,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 	# If doing a subdomain multisite install, ask for subdomains to add to nginx.conf
 	if [[ $multisite = 'subdomain' ]]; then
-		while [ -z $multisite_domains ]; do
+		while [ -z "$multisite_domains" ]; do
 			read -e -p "Multisite subdomains (no http:// or trailing slash, separated by spaces): " multisite_domains
 		done
 	fi
