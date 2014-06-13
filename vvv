@@ -449,12 +449,12 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 			# Delete the site folder
 			echo -en "Removing directory $site... "
 			rm -rf $path/www/$site
-			echo -e $done_text
+			done_text
 
 			# Remove the nginx conf file
 			echo -en "Removing nginx config file $site.conf... "
 			rm $path/config/nginx-config/sites/$site.conf
-			echo -e $done_text
+			done_text
 
 			# Delorted.
 			cecho "\nVVV Site Teardown: Done!" blue bold
