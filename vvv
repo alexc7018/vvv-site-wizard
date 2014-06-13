@@ -109,7 +109,7 @@ fi
 files_only=false
 wp_debug=false
 
-while getopts "xfiml:a:n:v:p:d:" opt; do
+while getopts "xfim:l:a:n:v:p:d:" opt; do
 	case $opt in
 		a)
 			action=$OPTARG >&2
@@ -139,7 +139,7 @@ while getopts "xfiml:a:n:v:p:d:" opt; do
 			live_site_url=$OPTARG >&2
 			;;
 		m)
-			multisite=true >&2
+			multisite=$OPTARG >&2
 			;;
 		\?)
 			cecho "Invalid option: -$OPTARG" red
@@ -151,6 +151,14 @@ while getopts "xfiml:a:n:v:p:d:" opt; do
 			;;
 	esac
 done
+
+# If multisite was flagged, make sure it's a valid value
+if [[ ! -z $multisite ]]; then
+	if [[ $multisite != 'subdomain' && $multisite != 'subdirectory' ]]; then
+		cecho "The multisite parameter must be set to 'subdomain' or 'subdirectory.'" red
+		exit
+	fi
+fi
 
 # =============================================================================
 # Get the action if it was not specified
@@ -304,6 +312,13 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		done
 	fi
 
+	# If doing a subdomain multisite install, ask for subdomains to add to nginx.conf
+	if [[ $multisite = 'subdomain' ]]; then
+		while [ -z $multisite_domains ]; do
+			read -e -p "Multisite subdomains (no http:// or trailing slash, separated by spaces): " multisite_domains
+		done
+	fi
+
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
 	cecho "\nAbout to perform the following:" normal bold
@@ -351,7 +366,9 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	fi
 
 	install_text='install'
-	if [[ "$multisite" = true ]]; then
+	if [[ $multisite = 'subdomain' ]]; then
+		install_text='multisite-install --subdomains'
+	elif [[ $multisite = 'subdirectory' ]]; then
 		install_text='multisite-install'
 	fi
 
@@ -385,7 +402,13 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# =============================================================================
 	cd $path/config/nginx-config/sites
 	echo -en "Creating nginx-config/sites/$site.conf... "
-	sed -e "s/testserver\.com/$domain/" \
+
+	nginx_domain_text="$domain"
+	if [[ $multisite = 'subdomain' ]]; then
+		nginx_domain_text="$domain $multisite_domains"
+	fi
+
+	sed -e "s/testserver\.com/$nginx_domain_text/" \
 		-e "s/wordpress-local/$site\/htdocs/" local-nginx-example.conf-sample > $site.conf
 
 	if [[ $image_proxy = 'y' ]]; then
