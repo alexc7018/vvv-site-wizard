@@ -349,7 +349,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	printf "echo \"Creating database '$site' (if it does not exist)...\"\n\n"\
 "mysql -u root --password=root -e \"CREATE DATABASE IF NOT EXISTS \\\`$db_name\\\`\"\n"\
 "mysql -u root --password=root -e \"GRANT ALL PRIVILEGES ON \\\`$db_name\\\`.* TO wp@localhost IDENTIFIED BY 'wp';\"\n\n"\
-"if [ ! -d \"htdocs\" ]; then\n"\
+"if [ ! -d \"htdocs/wp-admin\" ]; then\n"\
 "\techo 'Installing WordPress $version in $site/htdocs...'\n"\
 "\tmkdir ./htdocs\ncd ./htdocs\n"\
 "\twp core download --allow-root $installversion\n"\
