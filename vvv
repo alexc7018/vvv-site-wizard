@@ -288,9 +288,8 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	while [ -z $image_proxy ]; do
 		echo -n "Load images from live site (y/n): "
 		read image_proxy
-		if [[ $image_proxy != 'y' && $image_proxy != 'n' ]]; then
-			cecho "Answer y or n." red
-			unset image_proxy
+		if [ -z $image_proxy ]; then
+			image_proxy="n"
 		fi
 	done
 
