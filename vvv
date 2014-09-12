@@ -19,6 +19,7 @@
 # for the path to VVV. To run this from any directory and skip that prompt,
 # uncomment the following line and set it to the VVV root dir:
 #path=/path/to/vvv/root
+path=/Users/chrisgerberepg/Sites/vagrant-local
 
 # =============================================================================
 # Helper function for printing out usage information.
@@ -147,6 +148,18 @@ while getopts "xfil:a:n:v:p:d:" opt; do
 			;;
 	esac
 done
+
+# =============================================================================
+# Gets the source of the script
+# =============================================================================
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+VVVSWDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
 
 # =============================================================================
 # Get the action if it was not specified
@@ -346,7 +359,8 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		wp_debug_text=" --extra-php <<PHP\ndefine('WP_DEBUG', true);\ndefine('WP_DEBUG_LOG', true);\nPHP"
 	fi
 	
-	cp $path/vvv-site-wizard/plugins.conf vvv-plugins
+	
+	cp $VVVSWDIR/plugins.conf vvv-plugins
 	
 	cat <<INIT >> vvv-init.sh
 echo "Creating database '$site' (if it does not exist)..."
