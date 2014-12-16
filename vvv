@@ -34,6 +34,7 @@ usage() {
 "-m   multisite   Install as a multisite network (takes argument: 'subdirectory' or 'subdomain')\n"\
 "-n   site name   Desired name for the site directory (e.g. mysite)\n"\
 "-p   path        Path to VVV root (e.g. ~/vagrant-local)\n"\
+"-r   root        Path to web server root (e.g. htdocs)\n"\
 "-v   version     Version of WordPress to install\n"\
 "-x   debug       Turn on WP_DEBUG and WP_DEBUG_LOG\n"\
 "\n"
@@ -109,7 +110,7 @@ fi
 files_only=false
 wp_debug=false
 
-while getopts "xfim:l:a:n:v:p:d:" opt; do
+while getopts "xfim:l:a:n:v:p:d:r:" opt; do
 	case $opt in
 		a)
 			action=$OPTARG >&2
@@ -128,6 +129,9 @@ while getopts "xfim:l:a:n:v:p:d:" opt; do
 			;;
 		d)
 			domain=$OPTARG >&2
+			;;
+		r)
+			root=$OPTARG >&2
 			;;
 		x)
 			wp_debug=y >&2
@@ -246,6 +250,15 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		fi
 	done
 
+	# Get web root of site
+	while [ -z $root ]; do
+		echo -n "Root directory of site for server configuration and WordPress core files (leave blank for htdocs): "
+		read root
+		if [ -z $root ]; then
+			root="htdocs"
+		fi
+	done
+
 	# Get database name
 	db_name=$site
 
@@ -330,7 +343,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	fi
 
 	cecho "\nProvisioning Vagrant will do the following:" default bold
-	echo -e "* Create database $site\n* Install WordPress $version in the htdocs directory\n* Make the site visible at $domain"
+	echo -e "* Create database $site\n* Install WordPress $version in the $root directory\n* Make the site visible at $domain"
 
 	echo -en "\n"
 	while [ -z $continue_create ]; do
@@ -358,7 +371,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	echo -en "Creating site directory, wp-cli.yml, and vvv-init.sh file... "
 	mkdir $site && cd $site
 
-	printf "path: htdocs" > wp-cli.yml
+	printf "path: $root" > wp-cli.yml
 
 	wp_debug_text=''
 	if [[ $wp_debug = 'y' ]]; then
@@ -372,9 +385,9 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		install_text='multisite-install'
 	fi
 
-	printf "if [ ! -d \"htdocs\" ]; then\n"\
-"\techo 'Installing WordPress $version in $site/htdocs...'\n"\
-"\tmkdir ./htdocs\ncd ./htdocs\n"\
+	printf "if [ ! -d \"$root\" ]; then\n"\
+"\techo 'Installing WordPress $version in $site/$root...'\n"\
+"\tmkdir ./$root\ncd ./$root\n"\
 "\twp core download --allow-root $installversion\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root$wp_debug_text\n"\
 "\twp core $install_text --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
@@ -384,11 +397,11 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	done_text
 
 	# Create SQL commands for database creation
-    # =============================================================================
-    if [ ! -e $path/database/init-custom.sql ]; then
+		# =============================================================================
+		if [ ! -e $path/database/init-custom.sql ]; then
 		touch $path/database/init-custom.sql
-    fi
-    printf "CREATE DATABASE IF NOT EXISTS \`$db_name\`;\n"\
+		fi
+		printf "CREATE DATABASE IF NOT EXISTS \`$db_name\`;\n"\
 "GRANT ALL PRIVILEGES ON \`$db_name\`.* TO 'wp'@'localhost' IDENTIFIED BY 'wp';\n" >> $path/database/init-custom.sql
 
 	# Add vvv-hosts file for domain in the site's www root
@@ -415,7 +428,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	fi
 
 	sed -e "s|testserver\.com|$nginx_domain_text|" \
-		-e "s|wordpress-local|$site/htdocs|" local-nginx-example.conf-sample > $site.conf
+		-e "s|wordpress-local|$site/$root|" local-nginx-example.conf-sample > $site.conf
 
 	if [[ $image_proxy = 'y' ]]; then
 		sed -e $'s|\}|\\\n\\\t# Directives to send expires headers and turn off 404 error logging\.\\\n\\\tlocation ~\* \\.\(js\|css\|png\|jpg\|jpeg\|gif\|ico\)\$ \{\\\n\\\t\texpires 24h;\\\n\\\t\\\tlog_not_found off;\\\n\\\t\\\ttry_files \$uri \$uri\/ @production;\\\n\\\t\}\\\n\\\n\\\tlocation @production \{\\\n\\\t\\\tresolver 8\.8\.8\.8;\\\n\\\t\\\tproxy_pass http://LIVE_URL/$uri;\\\n\\\t\}\\\n\}|' -e "s|LIVE_URL|$live_site_url|" $site.conf > tmp.conf
