@@ -240,9 +240,11 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 		if [ -z $site ]; then
 			cecho "You must enter a directory name." red
-		elif [ -d "$path/www/$site" ]; then
-			cecho "Directory already exists." red
+		elif [ -f "$path/config/nginx-config/sites/$site.conf" ]; then
+			cecho "That site is already configured. Delete config/nginx-config/sites/$site.conf to run setup again." red
 			unset site
+		elif [ -d "$path/www/$site" ]; then
+			cecho "Directory already exists. Site setup files will be added to existing directory." red
 		fi
 	done
 
@@ -322,7 +324,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
 	cecho "\nAbout to perform the following:" normal bold
-	echo -e "* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
+	echo -e "* Halt Vagrant (if running)\n* Create directory $site in $path/www, if it doesn't already exist\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
 	if [[ "$files_only" = false ]]; then
 		echo -e "* Run \`vagrant up --provision\` to initialize site"
 	else
@@ -356,7 +358,11 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# =============================================================================
 	cd $path/www
 	echo -en "Creating site directory, wp-cli.yml, and vvv-init.sh file... "
-	mkdir $site && cd $site
+
+	if [ ! -d $site ]; then
+		mkdir $site
+	fi
+	cd $site
 
 	printf "path: htdocs" > wp-cli.yml
 
@@ -372,13 +378,16 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 		install_text='multisite-install'
 	fi
 
-	printf "if [ ! -d \"htdocs\" ]; then\n"\
+	printf "if [ ! -f \"htdocs/wp-blog-header.php\" ]; then\n"\
 "\techo 'Installing WordPress $version in $site/htdocs...'\n"\
-"\tmkdir ./htdocs\ncd ./htdocs\n"\
+"\tif [ ! -d \"htdocs\" ]; then\n"\
+"\t\tmkdir ./htdocs\n"\
+"\tfi\n"\
+"\tcd ./htdocs\n"\
 "\twp core download --allow-root $installversion\n"\
 "\twp core config --dbname=\"$db_name\" --dbuser=wp --dbpass=wp --dbhost=\"localhost\" --allow-root$wp_debug_text\n"\
 "\twp core $install_text --url=$domain --title=\"$site - A WordPress Site\" --admin_user=admin --admin_password=password --admin_email=demo@example.com --allow-root\n"\
-"\t\tcd -\n"\
+"\tcd -\n"\
 "fi\n" > vvv-init.sh
 
 	done_text
