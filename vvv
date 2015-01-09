@@ -446,6 +446,18 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 
 			vagrant halt
 
+			# Archive the site folder
+			while [ -z $archive_site ]; do
+				echo -n "Archive (tar) entire site directory before delete (y/n)? "
+				read archive_site
+				if [ $archive_site = 'y' ]; then
+					# Tar the
+					echo -en "Archiving $site directory to $path... "
+					tar -zcvf $path/$site.tar.gz $path/www/$site
+					done_text
+				fi
+			done
+
 			# Delete the site folder
 			echo -en "Removing directory $site... "
 			rm -rf $path/www/$site

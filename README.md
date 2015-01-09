@@ -63,6 +63,7 @@ Provisioning Vagrant takes a couple of minutes, but this is a crucial step as it
 Deleting a site does the following:
 
 * Halts Vagrant (if running)
+* Archives the site's web root (if selected).
 * Deletes the site's web root (which deletes the `vvv-init.sh`, `wp-cli.yml`, and `vvv-hosts` files as well)
 * Deletes the file in the `nginx-config` folder pertaining to the site
 
