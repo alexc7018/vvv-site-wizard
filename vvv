@@ -170,8 +170,8 @@ done
 # =============================================================================
 if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'delete' || $action = 'teardown' || $action = 'rm' || $action = 'list' ]]; then
 	# Get VVV root dir
-	if [ ! -z $path ]; then
-		path=$path
+	if [ ! -z "${path}" ]; then
+		path="${path}"
 	else
 		current_dir=`pwd`
 		if [ -e "$current_dir/Vagrantfile" ]; then
@@ -179,7 +179,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'de
 		elif [ -e ~/vagrant-local/Vagrantfile ]; then
 			path=~/vagrant-local
 		else
-			while [ -z $path ]; do
+			while [ -z "${path}" ]; do
 				read -e -p "VVV install directory: " path
 
 				# Make sure directory is actually a VVV root
@@ -190,7 +190,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' || $action = 'de
 			done
 		fi
 	fi
-	path=${path%/}
+	path="${path%/}"
 fi
 
 # =============================================================================
@@ -219,8 +219,8 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# =============================================================================
 
 	# Get site dir name if not supplied as argument
-	if [ -d "$path/www/$site" ]; then
-		cecho "Directory $path/www/$site already exists." red
+	if [ -d "${path}/www/$site" ]; then
+		cecho "Directory ${path}/www/$site already exists." red
 		unset site
 	fi
 	while [ -z $site ]; do
@@ -228,7 +228,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 		if [ -z $site ]; then
 			cecho "You must enter a directory name." red
-		elif [ -d "$path/www/$site" ]; then
+		elif [ -d "${path}/www/$site" ]; then
 			cecho "Directory already exists." red
 			unset site
 		fi
@@ -303,7 +303,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# Inform the user of what's about to happen and give them a chance to back out
 	# =============================================================================
 	cecho "\nAbout to perform the following:" normal bold
-	echo -e "* Halt Vagrant (if running)\n* Create directory $site in $path/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in $path/config/nginx-config/sites"
+	echo -e "* Halt Vagrant (if running)\n* Create directory $site in ${path}/www\n* Create files vvv-init.sh, wp-cli.yml, and vvv-hosts in directory $site\n* Create file $site.conf in ${path}/config/nginx-config/sites"
 	if [[ "$files_only" = false ]]; then
 		echo -e "* Run \`vagrant up --provision\` to initialize site"
 	else
@@ -330,12 +330,12 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 	# Start the par-tay
 	# =============================================================================
 	cecho "\nNew VVV setup starting for site '$site'" green
-	cd $path
+	cd "${path}"
 	vagrant halt
 
 	# Create site folder with vvv-init.sh file
 	# =============================================================================
-	cd $path/www
+	cd "${path}/www"
 	echo -en "Creating site directory, wp-cli.yml, and vvv-init.sh file... "
 	mkdir $site && cd $site
 
@@ -366,7 +366,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 	# Add vvv-hosts file for domain in the site's www root
 	# =============================================================================
-	cd $path/www/$site
+	cd "${path}/www/$site"
 	echo -en "Adding $domain to new vvv-hosts file... "
 	touch vvv-hosts
 	printf "$domain\n" >> vvv-hosts
@@ -374,7 +374,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 	# Add site conf file to nginx-config
 	# =============================================================================
-	cd $path/config/nginx-config/sites
+	cd "${path}/config/nginx-config/sites"
 	echo -en "Creating nginx-config/sites/$site.conf... "
 	sed -e "s|testserver\.com|$domain|" \
 		-e "s|wordpress-local|$site/htdocs|" local-nginx-example.conf-sample > $site.conf
@@ -389,7 +389,7 @@ if [[ $action = 'new' || $action = 'make' || $action = 'create' ]]; then
 
 	# vagrant waaaaay up
 	# =============================================================================
-	cd $path
+	cd "${path}"
 	if [[ "$files_only" = false ]]; then
 		echo -e "Running vagrant up --provision... "
 		vagrant up --provision
@@ -442,18 +442,18 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 		read continue_delete
 		if [ $continue_delete = 'y' ]; then
 			cecho "\nVVV teardown starting for site '$site'" green
-			cd $path
+			cd "${path}"
 
 			vagrant halt
 
 			# Delete the site folder
 			echo -en "Removing directory $site... "
-			rm -rf $path/www/$site
+			rm -rf "${path}/www/$site"
 			done_text
 
 			# Remove the nginx conf file
 			echo -en "Removing nginx config file $site.conf... "
-			rm $path/config/nginx-config/sites/$site.conf
+			rm "${path}/config/nginx-config/sites/$site.conf"
 			done_text
 
 			# Delorted.
@@ -479,7 +479,7 @@ elif [[ $action = 'teardown' || $action = 'delete' || $action = 'rm' ]]; then
 # =============================================================================
 elif [[ $action = 'list' ]]; then
 
-	cd $path/www
+	cd "${path}/www"
 	find . -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -d '' filename; do
 		filename=${filename:2}
 		if [[ $filename != 'default' && $filename != 'phpcs' && $filename != 'wp-cli' ]]; then
