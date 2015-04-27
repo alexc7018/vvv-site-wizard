@@ -1,12 +1,10 @@
 # VVV Site Wizard
 
+> I'm not very active on this project, but [bparbs](https://github.com/bradp) is doing great work on his fork of this project, [Variable VVV](https://github.com/bradp/vv).
+
 Version 1.1.3
 
 This bash script makes it easy to spin up a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV).
-
-> ## Develop Branch
->
-> The develop branch contains the latest and greatest updates, but is not necessarily stable. Updates are merged into master after being tested for a while. [Check it out!](https://github.com/aliso/vvv-site-wizard/tree/develop)
 
 ## Installation
 
