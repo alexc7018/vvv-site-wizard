@@ -1,6 +1,8 @@
 # VVV Site Wizard
 
-> I'm not very active on this project, but [bparbs](https://github.com/bradp) is doing great work on his fork of this project, [Variable VVV](https://github.com/bradp/vv).
+## Important:
+
+**I'm not very active on this project, but [bradp](https://github.com/bradp) is doing great work on his fork of this project, [Variable VVV](https://github.com/bradp/vv).**
 
 Version 1.1.3
 
